@@ -232,6 +232,7 @@ class Model(nn.Module):
             self.overrides = self.model.args = self._reset_ckpt_args(self.model.args)
             self.ckpt_path = self.model.pt_path
         else:
+            print(f'---------{weights = }')
             weights = checks.check_file(weights)  # runs in all cases, not redundant with above call
             self.model, self.ckpt = weights, None
             self.task = task or guess_model_task(weights)
