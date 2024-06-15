@@ -14,12 +14,12 @@ class TritonServer:
         self.config_path = Path(os.path.dirname(os.path.abspath(__file__)))
         self.yolo_path = self.config_path.parent
         self.config_file_name = 'config.pbtxt'
-        self.onnx_model_file_name = 'model.onnx'
+        self.onnx_model_file_name = 'model.plan'
         
     def export(self):
         model = YOLOv10(self.yolo_path.joinpath(f'{self.model_size}.pt'))
         option = {
-            'format': 'onnx',
+            'format': 'engine',  # onnx
             'imgsz': 640,
             'batch': 1,
             'simplify': True,
@@ -57,7 +57,7 @@ class TritonServer:
 
         container_id = (
             subprocess.check_output(
-                        f"docker run -d --gpus=1 --rm --net=host -v {self.triton_model_repo}:/models nvcr.io/nvidia/tritonserver:23.10-py3 --model-repository=/models",
+                        f"docker run -d --gpus=1 --rm --net=host -v {self.triton_model_repo}:/models nvcr.io/nvidia/tritonserver:23.10-py3 tritonserver --model-repository=/models",
                 shell=True,
             ).decode("utf-8")
              .strip()
@@ -81,8 +81,10 @@ class TritonServer:
             # 'device': 0,
             'save': True,
         }
-        results = model(**option)
-        print(results)
+        result = model(**option)[0]
+        result.plot()
+        print(0 in result.boxes.cls)
+        print(100 in result.boxes.cls)
 
     def clean_docker(self, container_id: str):
         import subprocess
@@ -93,19 +95,20 @@ if __name__ == '__main__':
     
     server = TritonServer(
         model_size='yolov10l',
-        triton_model_repo=rf'/home/zhangningboo/workspace/yolov10/triton_server/model_repository'
+        triton_model_repo=rf'/home/aky-ubuntu/workspace/yolov10/triton_server/model_repository'
     )
-    server.export()
-    server.mkdir()
-    server.cp_file()
+    # server.export()
+    # server.mkdir()
+    # server.cp_file()
     try:
-        container_id = server.start_docker()
+        # container_id = server.start_docker()
         server.call_http_interface(
             server=f'http://localhost:8000',
-            test_img=rf"/home/zhangningboo/Pictures/33108200631320002004/33108200631320002004_2024-05-24_2.jpg"
+            test_img=rf"/home/aky-ubuntu/workspace/yolov10/1.jpg"
         )
     except Exception as e:
         print(e)
     finally:
-        if container_id:
-            server.clean_docker(container_id)
+        # if container_id:
+        #     server.clean_docker(container_id)
+        pass
