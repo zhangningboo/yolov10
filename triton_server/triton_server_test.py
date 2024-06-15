@@ -35,7 +35,7 @@ class TritonServer:
         self.yolo_triton_path_version.mkdir(parents=True)
     
     def cp_file(self):
-        onnx_file = self.yolo_path.joinpath(f'{self.model_size}.onnx')
+        onnx_file = self.yolo_path.joinpath(f'{self.model_size}.engine')
         shutil.copyfile(onnx_file, self.yolo_triton_path_version.joinpath(self.onnx_model_file_name))
         
         from string import Template
@@ -57,7 +57,7 @@ class TritonServer:
 
         container_id = (
             subprocess.check_output(
-                        f"docker run -d --gpus=1 --rm --net=host -v {self.triton_model_repo}:/models nvcr.io/nvidia/tritonserver:23.10-py3 tritonserver --model-repository=/models",
+                        f"docker run -d --gpus=1 --rm --net=host -v {self.triton_model_repo}:/models nvcr.io/nvidia/tritonserver:23.10-py3 --model-repository=/models",
                 shell=True,
             ).decode("utf-8")
              .strip()
