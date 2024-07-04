@@ -5,7 +5,7 @@ model = YOLOv10('yolov10l.pt')
 # model = YOLOv10.from_pretrained('jameslahm/yolov10{n/s/m/b/l/x}')
 
 option = {
-    'format': 'tensorrt',  # onnx, tensorrt
+    'format': 'onnx',  # onnx, tensorrt
     'imgsz': 640,
     'batch': 1,
     'half': True,  # 
